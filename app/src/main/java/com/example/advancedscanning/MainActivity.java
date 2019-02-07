@@ -509,10 +509,12 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
                     ScanDataCollection.LabelType labelType = data.getLabelType();
                     // Concatenate barcode data and label type
                     statusStr = barcodeDate + " " + labelType;
+                    statusStr = FMDBarCode.buildFromGS1Data(barcodeDate).toString();
                 }
             }
 
             // Return result to populate on UI thread
+
             return statusStr;
 
 

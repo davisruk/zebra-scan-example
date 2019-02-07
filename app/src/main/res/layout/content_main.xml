@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingBottom="5dip" >
+
+        <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+        android:id="@+id/device_Selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dip"
+        android:text="Select Scanner Device Type:"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+        <Spinner
+        android:id="@+id/device_selection_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/device_Selection"
+        android:layout_margin="5dip" />
+
+        <TextView
+        android:id="@+id/decoder_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/device_selection_spinner"
+        android:layout_margin="5dip"
+        android:text="Select Decoder Params:"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+        <RelativeLayout
+        android:id="@+id/decoder_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/decoder_selection"
+        android:layout_margin="5dip" >
+
+        <CheckBox
+        android:id="@+id/checkBoxCode39"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="3dip"
+        android:checked="true"
+        android:text="Code 39"
+        android:textSize="14sp" />
+
+        <CheckBox
+        android:id="@+id/checkBoxCode128"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dip"
+        android:layout_toRightOf="@+id/checkBoxCode39"
+        android:checked="true"
+        android:text="Code 128"
+        android:textSize="14sp" />
+
+        <CheckBox
+        android:id="@+id/checkBoxUPCA"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dip"
+        android:layout_toRightOf="@+id/checkBoxCode128"
+        android:checked="true"
+        android:text="UPCA"
+        android:textSize="14sp" />
+
+        <CheckBox
+        android:id="@+id/checkBoxCode11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/checkBoxCode39"
+        android:layout_margin="3dip"
+        android:checked="true"
+        android:text="Code 11"
+        android:textSize="14sp" />
+
+        <CheckBox
+        android:id="@+id/checkBoxEan8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/checkBoxCode128"
+        android:layout_margin="3dip"
+        android:layout_toRightOf="@+id/checkBoxCode11"
+        android:checked="true"
+        android:text="EAN 8"
+        android:textSize="14sp" />
+
+        <CheckBox
+        android:id="@+id/checkBoxEan13"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/checkBoxUPCA"
+        android:layout_marginLeft="25dip"
+        android:layout_marginTop="3dip"
+        android:layout_toRightOf="@+id/checkBoxEan8"
+        android:checked="true"
+        android:text="EAN 13"
+        android:textSize="14sp" />
+        </RelativeLayout>
+
+        <TextView
+        android:id="@+id/reader_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/decoder_layout"
+        android:layout_margin="5dip"
+        android:text="Select Reader Params:"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+        <CheckBox
+        android:id="@+id/illumination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/reader_selection"
+        android:layout_margin="3dip"
+        android:checked="false"
+        android:text="Illumination Mode"
+        android:textSize="14sp" />
+
+        <TextView
+        android:id="@+id/scan_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/illumination"
+        android:layout_margin="5dip"
+        android:text="Select Scan Params:"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+        <RelativeLayout
+        android:id="@+id/scan_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scan_selection"
+        android:layout_margin="5dip" >
+
+        <CheckBox
+        android:id="@+id/vibration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="3dip"
+        android:checked="false"
+        android:text="Vibration"
+        android:textSize="14sp" />
+
+        <TextView
+        android:id="@+id/scan_tone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/vibration"
+        android:layout_margin="5dip"
+        android:text="Select Scan Tone:"
+        android:textSize="14sp" />
+
+        <Spinner
+        android:id="@+id/scan_tone_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scan_tone"
+        android:layout_margin="5dip" />
+        </RelativeLayout>
+
+        <Button
+        android:id="@+id/btn_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/scan_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dip"
+        android:text="Scan" />
+
+        <EditText
+        android:id="@+id/editText1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_scan"
+        android:layout_centerHorizontal="true"
+        android:ems="10"
+        android:fadeScrollbars="true"
+        android:focusableInTouchMode="false"
+        android:inputType="none|textMultiLine" />
+
+        <TextView
+        android:id="@+id/textViewStatusTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText1"
+        android:layout_centerHorizontal="true"
+        android:text="Status:" />
+
+        <TextView
+        android:id="@+id/textViewStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewStatusTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dip"
+        android:text="" />
+        </RelativeLayout>
+
+
+    </ScrollView>
+</android.support.constraint.ConstraintLayout>

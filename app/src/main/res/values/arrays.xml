@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Array of type of streaming on which the scan beep should be played -->
+    <string-array name="scan_tone_array">
+        <item>NONE (Silent Mode)</item>
+        <item>Adara.ogg</item>
+        <item>Antimony.ogg</item>
+        <item>Xenon.ogg</item>
+        <item>Vega.ogg</item>
+        <item>decode-short.wav</item>
+        <item>decode.wav</item>
+    </string-array>
+</resources>

@@ -1,9 +1,6 @@
 package com.example.advancedscanning;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -31,7 +28,6 @@ import com.symbol.emdk.barcode.Scanner.StatusListener;
 import com.symbol.emdk.barcode.ScannerConfig;
 import com.symbol.emdk.barcode.ScannerException;
 import com.symbol.emdk.barcode.ScannerInfo;
-import com.symbol.emdk.barcode.ScannerResults;
 import com.symbol.emdk.barcode.StatusData;
 
 import java.util.ArrayList;
@@ -211,14 +207,14 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     public void onData(ScanDataCollection scanDataCollection) {
         // Use the scanned data, process it on background thread using AsyncTask
         // and update the UI thread with the scanned results
-        new AsyncDataUpdate().execute(scanDataCollection);
+        new AsyncDataUpdate(dataView).execute(scanDataCollection);
     }
 
     @Override
     public void onStatus(StatusData statusData) {
         // process the scan status event on the background thread using
         // AsyncTask and update the UI thread with current scanner state
-        new AsyncStatusUpdate().execute(statusData);
+        new AsyncStatusUpdate(statusTextView).execute(statusData);
     }
 
     @Override
@@ -448,111 +444,6 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
                     .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             deviceSelectionSpinner.setAdapter(spinnerDataAdapter);
             deviceSelectionSpinner.setSelection(defaultIndex);
-        }
-    }
-
-    // AsyncTask that configures the scanned data on background
-    // thread and updated the result on UI thread with scanned data and type of
-    // label
-    private class AsyncDataUpdate extends
-            AsyncTask<ScanDataCollection, Void, String> {
-        @Override
-        protected String doInBackground(ScanDataCollection... params) {
-            ScanDataCollection scanDataCollection = params[0];
-            // Status string that contains both barcode data and type of barcode
-            // that is being scanned
-            String statusStr = "";
-            // The ScanDataCollection object gives scanning result and the
-            // collection of ScanData. So check the data and its status
-            if (scanDataCollection != null
-                    && scanDataCollection.getResult() == ScannerResults.SUCCESS) {
-                ArrayList<ScanDataCollection.ScanData> scanData = scanDataCollection.getScanData();
-                // Iterate through scanned data and prepare the statusStr
-                for (ScanDataCollection.ScanData data : scanData) {
-                    // Get the scanned data
-                    String barcodeData = data.getData();
-                    // Get the type of label being scanned
-                    ScanDataCollection.LabelType labelType = data.getLabelType();
-                    // Concatenate barcode data and label type
-                    if (!labelType.equals(ScanDataCollection.LabelType.DATAMATRIX)){
-                        statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
-                    } else {
-                        FMDBarCode fmd = FMDBarCode.buildFromGS1Data(barcodeData);
-                        // barcode is a 2D matrix but still need to check if string was an FMD code
-                        if (fmd.isValid()) {
-                            statusStr = fmd.toString();
-                        } else {
-                            statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
-                        }
-                    }
-                }
-            }
-           // Return result to populate on UI thread
-            return statusStr;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            dataView.getText().clear();
-            dataView.append(result + "\n");
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-        }
-    }
-
-    // AsyncTask that configures the current state of scanner on background
-    // thread and updates the result on UI thread
-    private class AsyncStatusUpdate extends AsyncTask<StatusData, Void, String> {
-        @Override
-        protected String doInBackground(StatusData... params) {
-            // Get the current state of scanner in background
-            StatusData statusData = params[0];
-            String statusStr = "";
-            StatusData.ScannerStates state = statusData.getState();
-            // Different states of Scanner
-            switch (state) {
-                // Scanner is IDLE
-                case IDLE:
-                    statusStr = "The scanner enabled and its idle";
-                    break;
-                // Scanner is SCANNING
-                case SCANNING:
-                    statusStr = "Scanning..";
-                    break;
-                // Scanner is waiting for trigger press
-                case WAITING:
-                    statusStr = "Waiting for trigger press..";
-                    break;
-                // Scanner is not enabled
-                case DISABLED:
-                    statusStr = "Scanner is not enabled";
-                    break;
-                default:
-                    break;
-            }
-            // Return result to populate on UI thread
-            return statusStr;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            // Update the status text view on UI thread with current scanner
-            // state
-            statusTextView.setText(result);
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
         }
     }
 }

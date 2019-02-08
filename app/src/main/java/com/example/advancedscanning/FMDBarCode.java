@@ -53,6 +53,9 @@ public class FMDBarCode {
         return processGS1Data(bc, gs1);
     }
 
+    public boolean isValid () {
+        return !(gtin == null || batch == null || expiry == null || serial == null);
+    }
     private static FMDBarCode processGS1Data(FMDBarCode bc, String gs1){
         if (gs1.length() == 0)
             return bc;
@@ -73,15 +76,20 @@ public class FMDBarCode {
     }
 
     private static FMDBarCode processVariableLengthField (FMDBarCode bc, String gs1){
-        int igs = getIndexOfGSChar(gs1, 20);
-        int endIndex = gs1.length();
-        endIndex = endIndex < 22 ? endIndex : 22;
+        int igs = getIndexOfGSChar(gs1, 21);
+        int barCodeLen = gs1.length();
+        int endIndex = barCodeLen < 22 ? barCodeLen : 21;
         if (igs > -1) {
             endIndex = igs;
         }
         String code = gs1.substring(0,2);
+        if (!(code.equals("21") || code.equals ("10"))) {
+            System.out.println("No FMD variable length fields detected. Ending recursion.");
+            return bc;
+        }
+
         if (code.equals("21")) {
-            System.out.println("Serial detected");
+            System.out.println("Serial detected, endIndex is " + endIndex);
             bc.setSerial(gs1.substring(2, endIndex));
             System.out.println(bc.getSerial());
         }else{
@@ -93,9 +101,9 @@ public class FMDBarCode {
         return processGS1Data(bc, gs1.substring(endIndex));
     }
 
-    private static int getIndexOfGSChar(String s, int testLen){
+    private static int getIndexOfGSChar(String s, int toIndex){
         int i = s.indexOf((char)29);
-        if (i > testLen) {
+        if (i > toIndex) {
             i = -1;
         }
         return i;

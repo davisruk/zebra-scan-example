@@ -73,9 +73,7 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     private CheckBox checkBoxVibrationMode;
     // Drop Down for selecting scanner devices
     private Spinner deviceSelectionSpinner;
-    // Drop Down for selecting the type of streaming on which the scan beep
-// should
-// be played
+    // Drop Down for selecting the type of streaming on which the scan beep should be played
     private Spinner scanToneSpinner;
     // Array Adapter to hold arrays that are used in various drop downs
     private ArrayAdapter<String> spinnerDataAdapter;
@@ -83,8 +81,7 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     private List<ScannerInfo> deviceList;
     // Provides current scanner index in the device Selection Spinner
     private int scannerIndex = 0;
-    // Boolean to avoid calling setProfile() method again in the scan tone
-// listener
+    // Boolean to avoid calling setProfile() method again in the scan tone listener
     private boolean isScanToneFirstTime;
 
     @Override
@@ -176,14 +173,13 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
         barcodeManager = (BarcodeManager) this.emdkManager
                 .getInstance(EMDKManager.FEATURE_TYPE.BARCODE);
 
-// Get the supported scanner devices
+        // Get the supported scanner devices
         enumerateScannerDevices();
     }
 
     @Override
     public void onClosed() {
-// The EMDK closed abruptly. // Clean up the objects created by EMDK
-// manager
+    // The EMDK closed abruptly. // Clean up the objects created by EMDK manager
         if (this.emdkManager != null) {
 
             this.emdkManager.release();
@@ -504,12 +500,16 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
                 // Iterate through scanned data and prepare the statusStr
                 for (ScanDataCollection.ScanData data : scanData) {
                     // Get the scanned data
-                    String barcodeDate = data.getData();
+                    String barcodeData = data.getData();
                     // Get the type of label being scanned
                     ScanDataCollection.LabelType labelType = data.getLabelType();
                     // Concatenate barcode data and label type
-                    statusStr = barcodeDate + " " + labelType;
-                    statusStr = FMDBarCode.buildFromGS1Data(barcodeDate).toString();
+                    FMDBarCode fmd = FMDBarCode.buildFromGS1Data(barcodeData);
+                    if (fmd.isValid()) {
+                        statusStr = fmd.toString();
+                    } else {
+                        statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
+                    }
                 }
             }
 

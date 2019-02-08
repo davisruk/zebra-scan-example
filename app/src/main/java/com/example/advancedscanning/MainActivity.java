@@ -504,17 +504,20 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
                     // Get the type of label being scanned
                     ScanDataCollection.LabelType labelType = data.getLabelType();
                     // Concatenate barcode data and label type
-                    FMDBarCode fmd = FMDBarCode.buildFromGS1Data(barcodeData);
-                    if (fmd.isValid()) {
-                        statusStr = fmd.toString();
-                    } else {
+                    if (!labelType.equals(ScanDataCollection.LabelType.DATAMATRIX)){
                         statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
+                    } else {
+                        FMDBarCode fmd = FMDBarCode.buildFromGS1Data(barcodeData);
+                        // barcode is a 2D matrix but still need to check if string was an FMD code
+                        if (fmd.isValid()) {
+                            statusStr = fmd.toString();
+                        } else {
+                            statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
+                        }
                     }
                 }
             }
-
-            // Return result to populate on UI thread
-
+           // Return result to populate on UI thread
             return statusStr;
 
 

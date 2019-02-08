@@ -76,9 +76,9 @@ public class FMDBarCode {
     }
 
     private static FMDBarCode processVariableLengthField (FMDBarCode bc, String gs1){
-        int igs = getIndexOfGSChar(gs1, 21);
+        int igs = getIndexOfGSChar(gs1, 22);
         int barCodeLen = gs1.length();
-        int endIndex = barCodeLen < 22 ? barCodeLen : 21;
+        int endIndex = barCodeLen < 22 ? barCodeLen : 22;
         if (igs > -1) {
             endIndex = igs;
         }

@@ -1,52 +1,13 @@
 package com.example.advancedscanning;
 
+import lombok.Data;
+
+@Data
 public class FMDBarCode {
     private String gtin;
     private String batch;
     private String serial;
     private String expiry;
-
-    @Override
-    public String toString() {
-        return "FMDBarCode{" +
-                "gtin='" + gtin + '\'' +
-                ", batch='" + batch + '\'' +
-                ", serial='" + serial + '\'' +
-                ", expiry='" + expiry + '\'' +
-                '}';
-    }
-
-    public String getGtin() {
-        return gtin;
-    }
-
-    public String getBatch() {
-        return batch;
-    }
-
-    public void setBatch(String batch) {
-        this.batch = batch;
-    }
-
-    public String getSerial() {
-        return serial;
-    }
-
-    public void setSerial(String serial) {
-        this.serial = serial;
-    }
-
-    public String getExpiry() {
-        return expiry;
-    }
-
-    public void setExpiry(String expiry) {
-        this.expiry = expiry;
-    }
-
-    public void setGtin(String gtin) {
-        this.gtin = gtin;
-    }
 
     public static FMDBarCode buildFromGS1Data(String gs1){
         FMDBarCode bc = new FMDBarCode();

@@ -41,8 +41,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements EMDKListener,
         StatusListener, DataListener, CompoundButton.OnCheckedChangeListener {
 
-    // Update the scan data on UI
-    int dataLength = 0;
     // Declare a variable to store EMDKManager object
     private EMDKManager emdkManager = null;
     // Declare a variable to store Barcode Manager object
@@ -259,13 +257,10 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
 
     // Listener for Scan Tone Spinner
     private void addSpinnerScanToneListener() {
-
         scanToneSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View arg1,
                                        int position, long arg3) {
-
                 // Ignore Scan Tone spinner firing of for the first time, which
                 // is not required
                 if (isScanToneFirstTime)
@@ -319,15 +314,12 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
 
     // Disable the scanner instance
     private void deInitScanner() {
-
         if (scanner != null) {
             try {
                 scanner.cancelRead();
-
                 scanner.removeDataListener(this);
                 scanner.removeStatusListener(this);
                 scanner.disable();
-
             } catch (ScannerException e) {
                 // TODO Auto-generated catch block
                 statusTextView.setText("Status: " + e.getMessage());
@@ -338,7 +330,6 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
 
     // Method to initialize and enable Scanner and its listeners
     private void initializeScanner() throws ScannerException {
-
         if (deviceList.size() != 0) {
             scanner = barcodeManager.getDevice(deviceList.get(scannerIndex));
         } else {
@@ -348,15 +339,12 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
         }
 
         if (scanner != null) {
-
             // Add data and status listeners
             scanner.addDataListener(this);
             scanner.addStatusListener(this);
-
             try {
                 // Enable the scanner
                 scanner.enable();
-
             } catch (ScannerException e) {
                 // TODO Auto-generated catch block
                 statusTextView.setText("Status: " + e.getMessage());
@@ -367,32 +355,25 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     // Sets the user selected Barcode scanning Profile
     public void setProfile() {
         try {
-
             // cancel any pending asynchronous read calls before applying profile
             // and start reading barcodes
-            if (scanner.isReadPending())
+            if (scanner.isReadPending()) {
                 scanner.cancelRead();
-
+            }
             ScannerConfig config = scanner.getConfig();
 
             // Set code11
             config.decoderParams.code11.enabled = checkBoxCode11.isChecked();
-
             // Set code39
             config.decoderParams.code39.enabled = checkBoxCode39.isChecked();
-
             // Set code128
             config.decoderParams.code128.enabled = checkBoxCode128.isChecked();
-
             // set codeUPCA
             config.decoderParams.upca.enabled = checkBoxCodeUPCA.isChecked();
-
             // set EAN8
             config.decoderParams.ean8.enabled = checkBoxEAN8.isChecked();
-
             // set EAN13
             config.decoderParams.ean13.enabled = checkBoxEAN13.isChecked();
-
             // set Illumination Mode, which is available only for
             // INTERNAL_CAMERA1 device type
             if (checkBoxIlluminationMode.isChecked()
@@ -405,18 +386,18 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
 
             // set Vibration Mode (decodeHapticFeedback)
             config.scanParams.decodeHapticFeedback = checkBoxVibrationMode.isChecked();
-
             // Set the Scan Tone selected from the Scan Tone Spinner
             config.scanParams.audioStreamType = ScannerConfig.AudioStreamType.RINGER;
             String scanTone = scanToneSpinner.getSelectedItem().toString();
-            if (scanTone.contains("NONE"))
+            if (scanTone.contains("NONE")) {
                 // Silent Mode (No scan tone will be played)
                 config.scanParams.decodeAudioFeedbackUri = "";
-            else
+            }
+            else {
                 // Other selected scan tones from the drop-down
                 config.scanParams.decodeAudioFeedbackUri = "system/media/audio/notifications/"
                         + scanTone;
-
+            }
             scanner.setConfig(config);
 
             // Starts an asynchronous Scan. The method will not turn
@@ -427,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
             // hardware
             // trigger or can be turned ON automatically.
             scanner.read();
-
             Toast.makeText(MainActivity.this,
                     "Changes Appplied. Press Scan Button to start scanning...",
                     Toast.LENGTH_SHORT).show();
@@ -439,18 +419,14 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
 
     // Go through and get the available scanner devices
     private void enumerateScannerDevices() {
-
         if (barcodeManager != null) {
-
             List<String> friendlyNameList = new ArrayList<String>();
             int spinnerIndex = 0;
             // Set the default selection in the spinner
             int defaultIndex = 0;
-
             deviceList = barcodeManager.getSupportedDevicesInfo();
 
             if (deviceList.size() != 0) {
-
                 Iterator<ScannerInfo> it = deviceList.iterator();
                 while (it.hasNext()) {
                     ScannerInfo scnInfo = it.next();
@@ -470,7 +446,6 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
                     android.R.layout.simple_spinner_item, friendlyNameList);
             spinnerDataAdapter
                     .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
             deviceSelectionSpinner.setAdapter(spinnerDataAdapter);
             deviceSelectionSpinner.setSelection(defaultIndex);
         }
@@ -481,22 +456,17 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     // label
     private class AsyncDataUpdate extends
             AsyncTask<ScanDataCollection, Void, String> {
-
         @Override
         protected String doInBackground(ScanDataCollection... params) {
             ScanDataCollection scanDataCollection = params[0];
-
             // Status string that contains both barcode data and type of barcode
             // that is being scanned
             String statusStr = "";
-
             // The ScanDataCollection object gives scanning result and the
             // collection of ScanData. So check the data and its status
             if (scanDataCollection != null
                     && scanDataCollection.getResult() == ScannerResults.SUCCESS) {
-
                 ArrayList<ScanDataCollection.ScanData> scanData = scanDataCollection.getScanData();
-
                 // Iterate through scanned data and prepare the statusStr
                 for (ScanDataCollection.ScanData data : scanData) {
                     // Get the scanned data
@@ -519,19 +489,11 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
             }
            // Return result to populate on UI thread
             return statusStr;
-
-
         }
 
         @Override
         protected void onPostExecute(String result) {
-            // Update the dataView EditText on UI thread with barcode data and
-            // its label type
-//            if (dataLength++ > 1) {
-                // Clear the cache after 1 scan
-                dataView.getText().clear();
-//                dataLength = 0;
-//            }
+            dataView.getText().clear();
             dataView.append(result + "\n");
         }
 
@@ -547,7 +509,6 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     // AsyncTask that configures the current state of scanner on background
     // thread and updates the result on UI thread
     private class AsyncStatusUpdate extends AsyncTask<StatusData, Void, String> {
-
         @Override
         protected String doInBackground(StatusData... params) {
             // Get the current state of scanner in background

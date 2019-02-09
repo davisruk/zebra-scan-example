@@ -113,6 +113,7 @@
         android:checked="true"
         android:text="EAN 13"
         android:textSize="14sp" />
+
         </RelativeLayout>
 
         <TextView
@@ -178,6 +179,17 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/scan_tone"
         android:layout_margin="5dip" />
+
+        <CheckBox
+            android:id="@+id/checkBoxDecommission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:layout_below="@+id/scan_tone_spinner"
+            android:checked="false"
+            android:text="Decommission"
+            android:textSize="14sp" />
+
         </RelativeLayout>
 
         <Button

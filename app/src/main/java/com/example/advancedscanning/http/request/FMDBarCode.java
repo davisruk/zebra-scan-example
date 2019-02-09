@@ -6,7 +6,7 @@ import lombok.Data;
 public class FMDBarCode {
     private String gtin;
     private String batch;
-    private String serial;
+    private String serialNumber;
     private String expiry;
 
     public static FMDBarCode buildFromGS1Data(String gs1){
@@ -15,7 +15,7 @@ public class FMDBarCode {
     }
 
     public boolean isValid () {
-        return !(gtin == null || batch == null || expiry == null || serial == null);
+        return !(gtin == null || batch == null || expiry == null || serialNumber == null);
     }
     private static FMDBarCode processGS1Data(FMDBarCode bc, String gs1){
         if (gs1.length() == 0)
@@ -28,7 +28,9 @@ public class FMDBarCode {
             return processGS1Data(bc, gs1.substring(16));
         }else if (gs1.substring(0,2).equals("17")){
             System.out.println("Expiry detected");
-            bc.setExpiry(gs1.substring(2, 8));
+            String date = gs1.substring(2, 8);
+            String reversedDate = date.substring(4) + "/" + date.substring(2,4) + "/20" + date.substring(0,2);
+            bc.setExpiry(reversedDate);
             System.out.println(bc.getExpiry());
             return processGS1Data(bc, gs1.substring(8));
         }else {
@@ -51,8 +53,8 @@ public class FMDBarCode {
 
         if (code.equals("21")) {
             System.out.println("Serial detected, endIndex is " + endIndex);
-            bc.setSerial(gs1.substring(2, endIndex));
-            System.out.println(bc.getSerial());
+            bc.setSerialNumber(gs1.substring(2, endIndex));
+            System.out.println(bc.getSerialNumber());
         }else{
             System.out.println("Batch detected");
             bc.setBatch(gs1.substring(2, endIndex));

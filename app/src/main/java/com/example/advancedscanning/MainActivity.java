@@ -17,11 +17,22 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.advancedscanning.http.AsyncUpdateListener;
 import com.example.advancedscanning.http.request.FMDBarCode;
 import com.example.advancedscanning.http.request.FMDRequest;
+import com.example.advancedscanning.http.request.PatientBag;
+import com.example.advancedscanning.http.request.RequestQueueSingleton;
+import com.example.advancedscanning.http.request.Store;
+import com.example.advancedscanning.http.response.FMDResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.EMDKManager.EMDKListener;
 import com.symbol.emdk.EMDKResults;
@@ -34,6 +45,8 @@ import com.symbol.emdk.barcode.ScannerConfig;
 import com.symbol.emdk.barcode.ScannerException;
 import com.symbol.emdk.barcode.ScannerInfo;
 import com.symbol.emdk.barcode.StatusData;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -83,9 +96,14 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     // Boolean to avoid calling setProfile() method again in the scan tone listener
     private boolean isScanToneFirstTime;
 
+    private CheckBox checkBoxDecommission;
+
     private Gson gson;
     private FMDRequest fmdRequest;
-
+    private Store store = Store.builder()
+                                    .id("123")
+                                    .name("Beeston")
+                                .build();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +122,8 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         checkBoxEAN8 = findViewById(R.id.checkBoxEan8);
         checkBoxEAN13 = findViewById(R.id.checkBoxEan13);
 
+        checkBoxDecommission = findViewById(R.id.checkBoxDecommission);
+
         checkBoxIlluminationMode = findViewById(R.id.illumination);
         checkBoxVibrationMode = findViewById(R.id.vibration);
 
@@ -115,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         checkBoxEAN13.setOnCheckedChangeListener(this);
         checkBoxIlluminationMode.setOnCheckedChangeListener(this);
         checkBoxVibrationMode.setOnCheckedChangeListener(this);
+
+        checkBoxDecommission.setOnCheckedChangeListener(this);
 
         deviceSelectionSpinner = findViewById(R.id.device_selection_spinner);
         scanToneSpinner = findViewById(R.id.scan_tone_spinner);
@@ -379,6 +401,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
             config.decoderParams.ean8.enabled = checkBoxEAN8.isChecked();
             // set EAN13
             config.decoderParams.ean13.enabled = checkBoxEAN13.isChecked();
+
             // set Illumination Mode, which is available only for
             // INTERNAL_CAMERA1 device type
             if (checkBoxIlluminationMode.isChecked()
@@ -460,5 +483,47 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     public void setFMDBarcodeData(FMDBarCode bc) {
         dataView.getText().clear();
         dataView.append(bc.toString() + "\n");
+        sendFMDRequest(bc);
+    }
+
+    private void sendFMDRequest (FMDBarCode bc) {
+        String url = "http://192.168.1.205:8080/camel/fmd";
+        ArrayList packs = new ArrayList<FMDBarCode>();
+        packs.add(bc);
+        FMDRequest fmdReq = FMDRequest.builder()
+                .operation(checkBoxDecommission.isChecked() ? "undo-dispense" : "dispense")
+                .store(store)
+                .bag(PatientBag.builder()
+                        .labelCode("123456")
+                        .packs(packs)
+                        .build())
+                .build();
+
+        RequestQueueSingleton queue = RequestQueueSingleton.getInstance(this);
+        try {
+            JSONObject jsonObject = new JSONObject(gson.toJson(fmdReq));
+            System.out.println(jsonObject.toString());
+            JsonObjectRequest jobReq = new JsonObjectRequest(Request.Method.POST, url, jsonObject,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            FMDResponse fmdRes = gson.fromJson(response.toString(), FMDResponse.class);
+                            System.out.println("Successful Request");
+                            System.out.println(fmdRes.toString());
+                            dataView.getText().clear();
+                            dataView.append(fmdRes.toString() + "\n");
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            System.out.println("Request Error");
+                            System.out.println(error.toString());
+                        }
+                    });
+            queue.addToRequestQueue(jobReq);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }

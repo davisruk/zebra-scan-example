@@ -3,20 +3,26 @@ package com.example.advancedscanning;
 import android.os.AsyncTask;
 import android.widget.EditText;
 
+import com.example.advancedscanning.http.AsyncUpdateListener;
+import com.example.advancedscanning.http.request.FMDBarCode;
 import com.symbol.emdk.barcode.ScanDataCollection;
 import com.symbol.emdk.barcode.ScannerResults;
 
 import java.util.ArrayList;
 
-import lombok.AllArgsConstructor;
-
 // AsyncTask that configures the scanned data on background
 // thread and updated the result on UI thread with scanned data and type of
 // label
-@AllArgsConstructor
+
 class AsyncDataUpdate extends
         AsyncTask<ScanDataCollection, Void, String> {
-    private EditText dataView;
+    private AsyncUpdateListener listener;
+    private FMDBarCode fmd;
+
+    public AsyncDataUpdate (AsyncUpdateListener listener){
+        this.listener = listener;
+    }
+
     @Override
     protected String doInBackground(ScanDataCollection... params) {
         ScanDataCollection scanDataCollection = params[0];
@@ -38,7 +44,7 @@ class AsyncDataUpdate extends
                 if (!labelType.equals(ScanDataCollection.LabelType.DATAMATRIX)){
                     statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
                 } else {
-                    FMDBarCode fmd = FMDBarCode.buildFromGS1Data(barcodeData);
+                    fmd = FMDBarCode.buildFromGS1Data(barcodeData);
                     // barcode is a 2D matrix but still need to check if string was an FMD code
                     if (fmd.isValid()) {
                         statusStr = fmd.toString();
@@ -54,8 +60,7 @@ class AsyncDataUpdate extends
 
     @Override
     protected void onPostExecute(String result) {
-        dataView.getText().clear();
-        dataView.append(result + "\n");
+        listener.setFMDBarcodeData(fmd);
     }
 
     @Override

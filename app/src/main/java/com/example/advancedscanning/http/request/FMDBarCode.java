@@ -1,4 +1,4 @@
-package com.example.advancedscanning;
+package com.example.advancedscanning.http.request;
 
 import lombok.Data;
 

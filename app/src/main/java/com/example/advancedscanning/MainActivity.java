@@ -17,6 +17,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.advancedscanning.http.AsyncUpdateListener;
+import com.example.advancedscanning.http.request.FMDBarCode;
+import com.example.advancedscanning.http.request.FMDRequest;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.EMDKManager.EMDKListener;
 import com.symbol.emdk.EMDKResults;
@@ -34,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements EMDKListener,
+public class MainActivity extends AppCompatActivity implements AsyncUpdateListener, EMDKListener,
         StatusListener, DataListener, CompoundButton.OnCheckedChangeListener {
 
     // Declare a variable to store EMDKManager object
@@ -78,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     // Boolean to avoid calling setProfile() method again in the scan tone listener
     private boolean isScanToneFirstTime;
 
+    private Gson gson;
+    private FMDRequest fmdRequest;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        gson = new GsonBuilder().create();
         // Reference to UI elements
         statusTextView = findViewById(R.id.textViewStatus);
         dataView = findViewById(R.id.editText1);
@@ -207,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
     public void onData(ScanDataCollection scanDataCollection) {
         // Use the scanned data, process it on background thread using AsyncTask
         // and update the UI thread with the scanned results
-        new AsyncDataUpdate(dataView).execute(scanDataCollection);
+        new AsyncDataUpdate(this).execute(scanDataCollection);
     }
 
     @Override
@@ -445,5 +454,11 @@ public class MainActivity extends AppCompatActivity implements EMDKListener,
             deviceSelectionSpinner.setAdapter(spinnerDataAdapter);
             deviceSelectionSpinner.setSelection(defaultIndex);
         }
+    }
+
+    @Override
+    public void setFMDBarcodeData(FMDBarCode bc) {
+        dataView.getText().clear();
+        dataView.append(bc.toString() + "\n");
     }
 }

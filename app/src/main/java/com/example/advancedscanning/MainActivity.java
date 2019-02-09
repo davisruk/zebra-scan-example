@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     private boolean isScanToneFirstTime;
 
     private CheckBox checkBoxDecommission;
+    private CheckBox checkBoxVerify;
 
     private Gson gson;
     private FMDRequest fmdRequest;
@@ -123,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         checkBoxEAN13 = findViewById(R.id.checkBoxEan13);
 
         checkBoxDecommission = findViewById(R.id.checkBoxDecommission);
+        checkBoxVerify = findViewById(R.id.checkBoxVerify);
 
         checkBoxIlluminationMode = findViewById(R.id.illumination);
         checkBoxVibrationMode = findViewById(R.id.vibration);
@@ -137,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         checkBoxVibrationMode.setOnCheckedChangeListener(this);
 
         checkBoxDecommission.setOnCheckedChangeListener(this);
+        checkBoxVerify.setOnCheckedChangeListener(this);
 
         deviceSelectionSpinner = findViewById(R.id.device_selection_spinner);
         scanToneSpinner = findViewById(R.id.scan_tone_spinner);
@@ -489,9 +492,13 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     private void sendFMDRequest (FMDBarCode bc) {
         String url = "http://192.168.1.205:8080/camel/fmd";
         ArrayList packs = new ArrayList<FMDBarCode>();
+        String operation = checkBoxDecommission.isChecked() ? "undo-dispense" : "dispense";
+        // verify takes precedence for time being
+        operation = checkBoxVerify.isChecked() ? "verify" : operation;
+
         packs.add(bc);
         FMDRequest fmdReq = FMDRequest.builder()
-                .operation(checkBoxDecommission.isChecked() ? "undo-dispense" : "dispense")
+                .operation(operation)
                 .store(store)
                 .bag(PatientBag.builder()
                         .labelCode("123456")

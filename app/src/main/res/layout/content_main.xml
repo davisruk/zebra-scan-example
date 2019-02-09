@@ -190,6 +190,16 @@
             android:text="Decommission"
             android:textSize="14sp" />
 
+            <CheckBox
+                android:id="@+id/checkBoxVerify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dip"
+                android:layout_toRightOf="@+id/checkBoxDecommission"
+                android:checked="false"
+                android:text="Verify"
+                android:textSize="14sp" />
+
         </RelativeLayout>
 
         <Button

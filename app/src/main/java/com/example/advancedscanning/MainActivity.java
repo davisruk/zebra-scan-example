@@ -68,32 +68,6 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     // Edit Text that is used to display scanned barcode data
     private EditText dataView = null;
     // CheckBox to set Decoder Param Code 11;
-    private CheckBox checkBoxCode11;
-    // CheckBox to set Decoder Param Code 39;
-    private CheckBox checkBoxCode39;
-    // CheckBox to set Decoder Param Code 128;
-    private CheckBox checkBoxCode128;
-    // CheckBox to set Decoder Param Code UPCA;
-    private CheckBox checkBoxCodeUPCA;
-    // CheckBox to set Decoder Param EAN 8;
-    private CheckBox checkBoxEAN8;
-    // CheckBox to set Decoder Param EAN 13;
-    private CheckBox checkBoxEAN13;
-    // CheckBox to set Reader Param Illumination Mode;
-    private CheckBox checkBoxIlluminationMode;
-    // CheckBox to set Scan Param Vibration Mode (decodeHapticFeedback);
-    private CheckBox checkBoxVibrationMode;
-    // Drop Down for selecting scanner devices
-    private Spinner deviceSelectionSpinner;
-    // Drop Down for selecting the type of streaming on which the scan beep should be played
-    private Spinner scanToneSpinner;
-    // Array Adapter to hold arrays that are used in various drop downs
-    private ArrayAdapter<String> spinnerDataAdapter;
-    // List of supported scanner devices
-    private List<ScannerInfo> deviceList;
-    // Provides current scanner index in the device Selection Spinner
-    private int scannerIndex = 0;
-    // Boolean to avoid calling setProfile() method again in the scan tone listener
     private boolean isScanToneFirstTime;
 
     private CheckBox checkBoxDecommission;
@@ -116,50 +90,15 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         // Reference to UI elements
         statusTextView = findViewById(R.id.textViewStatus);
         dataView = findViewById(R.id.editText1);
-        checkBoxCode11 = findViewById(R.id.checkBoxCode11);
-        checkBoxCode39 = findViewById(R.id.checkBoxCode39);
-        checkBoxCode128 = findViewById(R.id.checkBoxCode128);
-        checkBoxCodeUPCA = findViewById(R.id.checkBoxUPCA);
-        checkBoxEAN8 = findViewById(R.id.checkBoxEan8);
-        checkBoxEAN13 = findViewById(R.id.checkBoxEan13);
 
         checkBoxDecommission = findViewById(R.id.checkBoxDecommission);
         checkBoxVerify = findViewById(R.id.checkBoxVerify);
 
-        checkBoxIlluminationMode = findViewById(R.id.illumination);
-        checkBoxVibrationMode = findViewById(R.id.vibration);
-
-        checkBoxCode11.setOnCheckedChangeListener(this);
-        checkBoxCode39.setOnCheckedChangeListener(this);
-        checkBoxCode128.setOnCheckedChangeListener(this);
-        checkBoxCodeUPCA.setOnCheckedChangeListener(this);
-        checkBoxEAN8.setOnCheckedChangeListener(this);
-        checkBoxEAN13.setOnCheckedChangeListener(this);
-        checkBoxIlluminationMode.setOnCheckedChangeListener(this);
-        checkBoxVibrationMode.setOnCheckedChangeListener(this);
-
         checkBoxDecommission.setOnCheckedChangeListener(this);
         checkBoxVerify.setOnCheckedChangeListener(this);
 
-        deviceSelectionSpinner = findViewById(R.id.device_selection_spinner);
-        scanToneSpinner = findViewById(R.id.scan_tone_spinner);
-        // Adapter to hold the list of scan tone options
-        spinnerDataAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, getResources()
-                .getStringArray(R.array.scan_tone_array));
-        spinnerDataAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Set adapter to scan tone drop down
-        scanToneSpinner.setAdapter(spinnerDataAdapter);
-
         // Add onClick listener for scan button to enable soft scan through app
         addScanButtonListener();
-
-        // On Item Click Listener of Scanner Devices Spinner
-        addSpinnerScannerDevicesListener();
-
-        // On Item Click Listener of Scan Tone Spinner
-        addSpinnerScanToneListener();
 
         // The EMDKManager object will be created and returned in the callback.
         EMDKResults results = EMDKManager.getEMDKManager(
@@ -200,9 +139,12 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         // Get the Barcode Manager object
         barcodeManager = (BarcodeManager) this.emdkManager
                 .getInstance(EMDKManager.FEATURE_TYPE.BARCODE);
+        try {
+            initializeScanner();
+        } catch (ScannerException e) {
+            e.printStackTrace();
+        }
 
-        // Get the supported scanner devices
-        enumerateScannerDevices();
     }
 
     @Override
@@ -254,56 +196,6 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         setProfile();
-    }
-
-    // Listener for Scanner Device Spinner
-    private void addSpinnerScannerDevicesListener() {
-
-        deviceSelectionSpinner
-                .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent,
-                                               View arg1, int position, long arg3) {
-
-                        scannerIndex = position;
-                        try {
-                            deInitScanner();
-                            initializeScanner();
-                            setProfile();
-                        } catch (ScannerException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> arg0) {
-                        // TODO Auto-generated method stub
-                    }
-                });
-
-
-    }
-
-    // Listener for Scan Tone Spinner
-    private void addSpinnerScanToneListener() {
-        scanToneSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View arg1,
-                                       int position, long arg3) {
-                // Ignore Scan Tone spinner firing of for the first time, which
-                // is not required
-                if (isScanToneFirstTime)
-                    setProfile();
-                else
-                    isScanToneFirstTime = true;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-                // TODO Auto-generated method stub
-            }
-        });
     }
 
     // Listener for scan button that uses soft scan to scan barcodes through app
@@ -360,13 +252,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
 
     // Method to initialize and enable Scanner and its listeners
     private void initializeScanner() throws ScannerException {
-        if (deviceList.size() != 0) {
-            scanner = barcodeManager.getDevice(deviceList.get(scannerIndex));
-        } else {
-            statusTextView
-                    .setText("Status: "
-                            + "Failed to get the specified scanner device! Please close and restart the application.");
-        }
+        scanner = barcodeManager.getDevice(BarcodeManager.DeviceIdentifier.DEFAULT);
 
         if (scanner != null) {
             // Add data and status listeners
@@ -393,42 +279,30 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
             ScannerConfig config = scanner.getConfig();
 
             // Set code11
-            config.decoderParams.code11.enabled = checkBoxCode11.isChecked();
+            config.decoderParams.code11.enabled = true;
             // Set code39
-            config.decoderParams.code39.enabled = checkBoxCode39.isChecked();
+            config.decoderParams.code39.enabled = true;
             // Set code128
-            config.decoderParams.code128.enabled = checkBoxCode128.isChecked();
+            config.decoderParams.code128.enabled = true;
             // set codeUPCA
-            config.decoderParams.upca.enabled = checkBoxCodeUPCA.isChecked();
+            config.decoderParams.upca.enabled = true;
             // set EAN8
-            config.decoderParams.ean8.enabled = checkBoxEAN8.isChecked();
+            config.decoderParams.ean8.enabled = true;
             // set EAN13
-            config.decoderParams.ean13.enabled = checkBoxEAN13.isChecked();
+            config.decoderParams.ean13.enabled = true;
 
             // set Illumination Mode, which is available only for
             // INTERNAL_CAMERA1 device type
-            if (checkBoxIlluminationMode.isChecked()
-                    && deviceSelectionSpinner.getSelectedItem().toString()
-                    .contains("Camera")) {
-                config.readerParams.readerSpecific.cameraSpecific.illuminationMode = ScannerConfig.IlluminationMode.ON;
-            } else {
-                config.readerParams.readerSpecific.cameraSpecific.illuminationMode = ScannerConfig.IlluminationMode.OFF;
-            }
+            config.readerParams.readerSpecific.cameraSpecific.illuminationMode = ScannerConfig.IlluminationMode.OFF;
 
             // set Vibration Mode (decodeHapticFeedback)
-            config.scanParams.decodeHapticFeedback = checkBoxVibrationMode.isChecked();
+            config.scanParams.decodeHapticFeedback = false;
             // Set the Scan Tone selected from the Scan Tone Spinner
             config.scanParams.audioStreamType = ScannerConfig.AudioStreamType.RINGER;
-            String scanTone = scanToneSpinner.getSelectedItem().toString();
-            if (scanTone.contains("NONE")) {
-                // Silent Mode (No scan tone will be played)
-                config.scanParams.decodeAudioFeedbackUri = "";
-            }
-            else {
-                // Other selected scan tones from the drop-down
-                config.scanParams.decodeAudioFeedbackUri = "system/media/audio/notifications/"
-                        + scanTone;
-            }
+
+            // Other selected scan tones from the drop-down
+            config.scanParams.decodeAudioFeedbackUri = "system/media/audio/notifications/Vega.ogg";
+
             scanner.setConfig(config);
 
             // Starts an asynchronous Scan. The method will not turn
@@ -448,45 +322,20 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         }
     }
 
-    // Go through and get the available scanner devices
-    private void enumerateScannerDevices() {
-        if (barcodeManager != null) {
-            List<String> friendlyNameList = new ArrayList<String>();
-            int spinnerIndex = 0;
-            // Set the default selection in the spinner
-            int defaultIndex = 0;
-            deviceList = barcodeManager.getSupportedDevicesInfo();
-
-            if (deviceList.size() != 0) {
-                Iterator<ScannerInfo> it = deviceList.iterator();
-                while (it.hasNext()) {
-                    ScannerInfo scnInfo = it.next();
-                    friendlyNameList.add(scnInfo.getFriendlyName());
-                    if (scnInfo.isDefaultScanner()) {
-                        defaultIndex = spinnerIndex;
-                    }
-                    ++spinnerIndex;
-                }
-            } else {
-                statusTextView
-                        .setText("Status: "
-                                + "Failed to get the list of supported scanner devices! Please close and restart the application.");
-            }
-
-            spinnerDataAdapter = new ArrayAdapter<String>(MainActivity.this,
-                    android.R.layout.simple_spinner_item, friendlyNameList);
-            spinnerDataAdapter
-                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            deviceSelectionSpinner.setAdapter(spinnerDataAdapter);
-            deviceSelectionSpinner.setSelection(defaultIndex);
-        }
-    }
-
     @Override
     public void setFMDBarcodeData(FMDBarCode bc) {
         dataView.getText().clear();
         dataView.append(bc.toString() + "\n");
-        sendFMDRequest(bc);
+        if (bc.isValid()) {
+            sendFMDRequest(bc);
+        }
+        else {
+            // NOT WORKING - needs changing anyway
+            // AsyncDataUpdate should return its own class
+            // Barcode data could be a 1D bag label or a 2D FMD Code
+            statusTextView.setText("Invalid FMD Code");
+            statusTextView.append(bc.toString());
+        }
     }
 
     private void sendFMDRequest (FMDBarCode bc) {

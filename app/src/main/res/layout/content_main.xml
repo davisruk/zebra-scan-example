@@ -20,7 +20,39 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+
+            <TextView
+                android:id="@+id/textViewBagLabelLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bag Label:" />
+
+            <TextView
+                android:id="@+id/textViewBagLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/textViewBagLabelLabel"
+                android:layout_marginBottom="10dip"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/textViewPacksLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textViewBagLabelLabel"
+                android:text="Packs in bag:"
+                android:layout_marginBottom="10dip"/>
+
+            <TextView
+                android:id="@+id/textViewPacks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textViewPacksLabel"
+                android:layout_marginBottom="10dip"
+                android:text="" />
+
             <RadioGroup
+                android:layout_below="@+id/textViewPacks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/actionGroup"
@@ -49,9 +81,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/actionGroup"
-                android:layout_centerHorizontal="true"
                 android:layout_margin="5dip"
                 android:text="Scan" />
+
+            <Button
+                android:id="@+id/btn_clearBag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/btn_scan"
+                android:layout_below="@+id/actionGroup"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="5dip"
+                android:text="Clear Bag" />
+
+            <Button
+                android:id="@+id/btn_sendBag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/btn_clearBag"
+                android:layout_below="@+id/actionGroup"
+                android:layout_margin="5dip"
+                android:text="FMD Request" />
+
 
             <EditText
                 android:id="@+id/editText1"
@@ -70,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/editText1"
                 android:layout_centerHorizontal="true"
-                android:text="Status:" />
+                android:text="Scanner Status:" />
 
             <TextView
                 android:id="@+id/textViewStatus"
@@ -81,13 +132,7 @@
                 android:layout_marginBottom="10dip"
                 android:text="" />
 
-            <RadioGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="0dp"
-                android:layout_marginTop="14dp" />
+
         </RelativeLayout>
 
 

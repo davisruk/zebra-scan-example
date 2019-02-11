@@ -1,7 +1,7 @@
 package com.example.advancedscanning.http;
 
-import com.example.advancedscanning.http.request.FMDBarCode;
+import com.example.advancedscanning.ScanResult;
 
 public interface AsyncUpdateListener {
-    public void setFMDBarcodeData (FMDBarCode bc);
+    public void setScanResult (ScanResult sr);
 }

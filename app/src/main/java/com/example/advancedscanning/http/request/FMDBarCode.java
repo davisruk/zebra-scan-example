@@ -18,7 +18,7 @@ public class FMDBarCode {
         return !(gtin == null || batch == null || expiry == null || serialNumber == null);
     }
     private static FMDBarCode processGS1Data(FMDBarCode bc, String gs1){
-        if (gs1.length() == 0)
+        if (gs1.length() < 2)
             return bc;
         System.out.println("Unparsed Data Set: " + gs1);
         if (gs1.substring(0,2).equals("01")){

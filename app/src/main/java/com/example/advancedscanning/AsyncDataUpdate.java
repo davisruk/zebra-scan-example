@@ -1,7 +1,6 @@
 package com.example.advancedscanning;
 
 import android.os.AsyncTask;
-import android.widget.EditText;
 
 import com.example.advancedscanning.http.AsyncUpdateListener;
 import com.example.advancedscanning.http.request.FMDBarCode;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 class AsyncDataUpdate extends
         AsyncTask<ScanDataCollection, Void, String> {
     private AsyncUpdateListener listener;
-    private FMDBarCode fmd;
+    private ScanResult sr;
 
     public AsyncDataUpdate (AsyncUpdateListener listener){
         this.listener = listener;
@@ -25,10 +24,10 @@ class AsyncDataUpdate extends
 
     @Override
     protected String doInBackground(ScanDataCollection... params) {
+        // create new ScanResult
+        sr = new ScanResult();
         ScanDataCollection scanDataCollection = params[0];
-        // Status string that contains both barcode data and type of barcode
-        // that is being scanned
-        String statusStr = "";
+
         // The ScanDataCollection object gives scanning result and the
         // collection of ScanData. So check the data and its status
         if (scanDataCollection != null
@@ -41,26 +40,33 @@ class AsyncDataUpdate extends
                 // Get the type of label being scanned
                 ScanDataCollection.LabelType labelType = data.getLabelType();
                 // Concatenate barcode data and label type
-                if (!labelType.equals(ScanDataCollection.LabelType.DATAMATRIX)){
-                    statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
-                } else {
-                    fmd = FMDBarCode.buildFromGS1Data(barcodeData);
-                    // barcode is a 2D matrix but still need to check if string was an FMD code
-                    if (fmd.isValid()) {
-                        statusStr = fmd.toString();
+                if (labelType.equals(ScanDataCollection.LabelType.EAN13)){
+                    sr.setStatusString("EAN13 Scanned");
+                    sr.setLabelData(barcodeData);
+                    sr.setBarcodeType(ScanDataCollection.LabelType.EAN13);
+                } else if (labelType.equals(ScanDataCollection.LabelType.DATAMATRIX)){
+                    sr.setBarcodeType(ScanDataCollection.LabelType.DATAMATRIX);
+                    sr.setFmdData(FMDBarCode.buildFromGS1Data(barcodeData));
+                    if (sr.isValidFMDCode()) {
+                        sr.setStatusString("Data Matrix Scanned");
                     } else {
-                        statusStr = "Not FMD Barcode. Type is " + labelType + ", data is: " + barcodeData;
+                        sr.setStatusString("Non FMD Data Matrix Scanned. Data: " + barcodeData);
                     }
+
+
+                } else {
+                    sr.setStatusString("Non FMD App Barcode Scanned. Data: " + barcodeData);
+                    sr.setBarcodeSupported(false);
                 }
             }
         }
         // Return result to populate on UI thread
-        return statusStr;
+        return sr.getStatusString();
     }
 
     @Override
     protected void onPostExecute(String result) {
-        listener.setFMDBarcodeData(fmd);
+        listener.setScanResult(sr);
     }
 
     @Override

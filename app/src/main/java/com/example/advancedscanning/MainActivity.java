@@ -31,7 +31,9 @@ import com.example.advancedscanning.http.request.FMDRequest;
 import com.example.advancedscanning.http.request.PatientBag;
 import com.example.advancedscanning.http.request.RequestQueueSingleton;
 import com.example.advancedscanning.http.request.Store;
+import com.example.advancedscanning.http.response.FMDPackInfo;
 import com.example.advancedscanning.http.response.FMDResponse;
+import com.example.advancedscanning.http.response.PackResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -55,6 +57,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public class MainActivity extends AppCompatActivity implements AsyncUpdateListener, EMDKListener,
         StatusListener, DataListener{
@@ -71,15 +74,19 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     private TextView statusTextView = null;
     // Edit Text that is used to display scanned barcode data
     private EditText dataView = null;
-    // CheckBox to set Decoder Param Code 11;
-    private boolean isScanToneFirstTime;
 
     private Map<Integer, String> operations = new HashMap<Integer, String>();
 
     private RadioGroup radioGroupAction;
+    private Button btnClearBag;
+    private Button btnFmdRequest;
+    private TextView textViewBagLabel;
+    private TextView textViewPacks;
 
     private Gson gson;
     private FMDRequest fmdRequest;
+    private FMDResponse fmdRes;
+
     private Store store = Store.builder()
                                     .id("123")
                                     .name("Beeston")
@@ -94,12 +101,16 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         gson = new GsonBuilder().create();
         // Reference to UI elements
         statusTextView = findViewById(R.id.textViewStatus);
+        textViewBagLabel = findViewById(R.id.textViewBagLabel);
+        textViewPacks = findViewById(R.id.textViewPacks);
         dataView = findViewById(R.id.editText1);
 
         RadioButton radioUndispense = findViewById(R.id.radioUndispense);
         RadioButton radioVerify = findViewById(R.id.radioVerify);
         RadioButton radioDispense = findViewById(R.id.radioDispense);
         radioGroupAction = findViewById(R.id.actionGroup);
+        btnClearBag = findViewById(R.id.btn_clearBag);
+        btnFmdRequest = findViewById(R.id.btn_sendBag);
 
         operations.put(radioVerify.getId(), "verify");
         operations.put(radioUndispense.getId(), "undo-dispense");
@@ -108,6 +119,23 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         // Add onClick listener for scan button to enable soft scan through app
         addScanButtonListener();
 
+        btnFmdRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendFMDRequest();
+            }
+        });
+        btnClearBag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fmdRequest.clearBag();
+                textViewBagLabel.setText("");
+                dataView.getText().clear();
+                textViewPacks.setText("");
+                initialiseFMDRequest();
+                fmdRes = null;
+            }
+        });
         // The EMDKManager object will be created and returned in the callback.
         EMDKResults results = EMDKManager.getEMDKManager(
                 getApplicationContext(), this);
@@ -116,6 +144,13 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
             statusTextView.setText("EMDKManager Request Failed");
         }
+
+        initialiseFMDRequest();
+    }
+
+    private void initialiseFMDRequest() {
+        fmdRequest = new FMDRequest();
+        fmdRequest.setStore(store);
     }
 
     @Override
@@ -272,6 +307,37 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         }
     }
 
+    private void renderPacks() {
+        textViewPacks.setText("");
+        if (fmdRes != null) {
+            ArrayList<PackResponse> packResponses = fmdRes.getPackResponses();
+            IntStream.range(0, packResponses.size()).forEach(idx -> {
+                PackResponse pr = packResponses.get(idx);
+                FMDPackInfo p = pr.getPack();
+                textViewPacks.append("Pack: " + idx + "\n");
+                textViewPacks.append("\tGTIN: " + p.getGtin() + "\n");
+                textViewPacks.append("\tSerial Number: " + p.getSerialNumber() + "\n");
+                textViewPacks.append("\tBatch: " + p.getBatch() + "\n");
+                textViewPacks.append("\tExpiry: " + p.getExpiry() + "\n");
+                textViewPacks.append("\tState: " + p.getPackState() + "\n");
+                textViewPacks.append("\tReasons:\n");
+                pr.getReasons().forEach(s -> {
+                    textViewPacks.append("\t\t" + s + "\n");
+                });
+            });
+        } else if (fmdRequest != null) {
+            ArrayList<FMDBarCode> packs = fmdRequest.getBag().getPacks();
+            IntStream.range(0, packs.size()).forEach(idx -> {
+                FMDBarCode p = packs.get(idx);
+                textViewPacks.append("Pack: " + idx + "\n");
+                textViewPacks.append("\tGTIN: " + p.getGtin() + "\n");
+                textViewPacks.append("\tSerial Number: " + p.getSerialNumber() + "\n");
+                textViewPacks.append("\tBatch: " + p.getBatch() + "\n");
+                textViewPacks.append("\tExpiry: " + p.getExpiry() + "\n");
+            });
+        }
+
+    }
     // Sets the user selected Barcode scanning Profile
     public void setProfile() {
         try {
@@ -319,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
             // trigger or can be turned ON automatically.
             scanner.read();
             Toast.makeText(MainActivity.this,
-                    "Changes Appplied. Press Scan Button to start scanning...",
+                    "Changes Applied. Press Scan Button to start scanning...",
                     Toast.LENGTH_SHORT).show();
 
         } catch (ScannerException e) {
@@ -328,49 +394,46 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     }
 
     @Override
-    public void setFMDBarcodeData(FMDBarCode bc) {
+    public void setScanResult(ScanResult sr) {
         dataView.getText().clear();
-        dataView.append(bc.toString() + "\n");
-        if (bc.isValid()) {
-            sendFMDRequest(bc);
+        if (!sr.isBarcodeSupported()){
+            dataView.setText(sr.getStatusString());
         }
-        else {
-            // NOT WORKING - needs changing anyway
-            // AsyncDataUpdate should return its own class
-            // Barcode data could be a 1D bag label or a 2D FMD Code
-            statusTextView.setText("Invalid FMD Code");
-            statusTextView.append(bc.toString());
+        if (sr.isValidFMDCode()) {
+            FMDBarCode bc = sr.getFmdData();
+            if (fmdRequest == null) {
+                fmdRequest = new FMDRequest();
+            }
+            fmdRequest.addPack(bc);
+            renderPacks();
+        } else if (sr.currentBarcodeIsDataMatrix()) {
+            dataView.setText(sr.getStatusString());
+        } else if (sr.currentBarcodeIsEAN13()){
+            fmdRequest.setBagLabel(sr.getLabelData());
+            textViewBagLabel.setText(sr.getLabelData());
+        } else{
+            dataView.setText(sr.getStatusString());
         }
     }
 
-    private void sendFMDRequest (FMDBarCode bc) {
+    private void sendFMDRequest () {
         String url = "http://10.7.37.70:8080/camel/fmd";
         //String url = "http://192.168.1.205:8080/camel/fmd";
-        ArrayList packs = new ArrayList<FMDBarCode>();
         String operation = operations.get(radioGroupAction.getCheckedRadioButtonId());
-        packs.add(bc);
-        FMDRequest fmdReq = FMDRequest.builder()
-                .operation(operation)
-                .store(store)
-                .bag(PatientBag.builder()
-                        .labelCode("123456")
-                        .packs(packs)
-                        .build())
-                .build();
+        fmdRequest.setOperation(operation);
 
         RequestQueueSingleton queue = RequestQueueSingleton.getInstance(this);
         try {
-            JSONObject jsonObject = new JSONObject(gson.toJson(fmdReq));
+            JSONObject jsonObject = new JSONObject(gson.toJson(fmdRequest));
             System.out.println(jsonObject.toString());
             JsonObjectRequest jobReq = new JsonObjectRequest(Request.Method.POST, url, jsonObject,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            FMDResponse fmdRes = gson.fromJson(response.toString(), FMDResponse.class);
+                            fmdRes = gson.fromJson(response.toString(), FMDResponse.class);
                             System.out.println("Successful Request");
                             System.out.println(fmdRes.toString());
-                            dataView.getText().clear();
-                            dataView.append(fmdRes.toString() + "\n");
+                            renderPacks();
                         }
                     },
                     new Response.ErrorListener() {

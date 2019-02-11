@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,11 +51,13 @@ import com.symbol.emdk.barcode.StatusData;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements AsyncUpdateListener, EMDKListener,
-        StatusListener, DataListener, CompoundButton.OnCheckedChangeListener {
+        StatusListener, DataListener{
 
     // Declare a variable to store EMDKManager object
     private EMDKManager emdkManager = null;
@@ -70,8 +74,9 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     // CheckBox to set Decoder Param Code 11;
     private boolean isScanToneFirstTime;
 
-    private CheckBox checkBoxDecommission;
-    private CheckBox checkBoxVerify;
+    private Map<Integer, String> operations = new HashMap<Integer, String>();
+
+    private RadioGroup radioGroupAction;
 
     private Gson gson;
     private FMDRequest fmdRequest;
@@ -91,11 +96,14 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         statusTextView = findViewById(R.id.textViewStatus);
         dataView = findViewById(R.id.editText1);
 
-        checkBoxDecommission = findViewById(R.id.checkBoxDecommission);
-        checkBoxVerify = findViewById(R.id.checkBoxVerify);
+        RadioButton radioUndispense = findViewById(R.id.radioUndispense);
+        RadioButton radioVerify = findViewById(R.id.radioVerify);
+        RadioButton radioDispense = findViewById(R.id.radioDispense);
+        radioGroupAction = findViewById(R.id.actionGroup);
 
-        checkBoxDecommission.setOnCheckedChangeListener(this);
-        checkBoxVerify.setOnCheckedChangeListener(this);
+        operations.put(radioVerify.getId(), "verify");
+        operations.put(radioUndispense.getId(), "undo-dispense");
+        operations.put(radioDispense.getId(), "dispense");
 
         // Add onClick listener for scan button to enable soft scan through app
         addScanButtonListener();
@@ -193,11 +201,6 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         new AsyncStatusUpdate(statusTextView).execute(statusData);
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        setProfile();
-    }
-
     // Listener for scan button that uses soft scan to scan barcodes through app
     private void addScanButtonListener() {
         Button scanButton = findViewById(R.id.btn_scan);
@@ -255,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         scanner = barcodeManager.getDevice(BarcodeManager.DeviceIdentifier.DEFAULT);
 
         if (scanner != null) {
+            setProfile();
             // Add data and status listeners
             scanner.addDataListener(this);
             scanner.addStatusListener(this);
@@ -273,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         try {
             // cancel any pending asynchronous read calls before applying profile
             // and start reading barcodes
+            if (scanner == null) return;
             if (scanner.isReadPending()) {
                 scanner.cancelRead();
             }
@@ -339,12 +344,10 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     }
 
     private void sendFMDRequest (FMDBarCode bc) {
-        String url = "http://192.168.1.205:8080/camel/fmd";
+        String url = "http://10.7.37.70:8080/camel/fmd";
+        //String url = "http://192.168.1.205:8080/camel/fmd";
         ArrayList packs = new ArrayList<FMDBarCode>();
-        String operation = checkBoxDecommission.isChecked() ? "undo-dispense" : "dispense";
-        // verify takes precedence for time being
-        operation = checkBoxVerify.isChecked() ? "verify" : operation;
-
+        String operation = operations.get(radioGroupAction.getCheckedRadioButtonId());
         packs.add(bc);
         FMDRequest fmdReq = FMDRequest.builder()
                 .operation(operation)

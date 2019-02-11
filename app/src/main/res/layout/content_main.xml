@@ -8,74 +8,87 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:paddingBottom="5dip" >
+        android:paddingBottom="5dip"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="147dp">
 
         <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <CheckBox
-                android:id="@+id/checkBoxDecommission"
+            <RadioGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dip"
-                android:layout_marginTop="5dip"
-                android:layout_marginEnd="5dip"
-                android:layout_marginBottom="5dip"
-                android:checked="false"
-                android:text="Undo Dispense"
-                android:textSize="14sp" />
+                android:id="@+id/actionGroup"
+                android:checkedButton="@+id/radioVerify"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/radioVerify"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Verify"
+                    android:textSize="14sp" />
+                <RadioButton
+                    android:id="@+id/radioDispense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dispense"/>
+                <RadioButton
+                    android:id="@+id/radioUndispense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Undo Dispense"/>
+            </RadioGroup>
 
-            <CheckBox
-                android:id="@+id/checkBoxVerify"
+            <Button
+                android:id="@+id/btn_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/actionGroup"
+                android:layout_centerHorizontal="true"
                 android:layout_margin="5dip"
-                android:layout_toRightOf="@+id/checkBoxDecommission"
-                android:checked="false"
-                android:text="Verify"
-                android:textSize="14sp" />
+                android:text="Scan" />
 
-        <Button
-        android:id="@+id/btn_scan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="5dip"
-        android:layout_below="@+id/checkBoxDecommission"
-        android:text="Scan" />
+            <EditText
+                android:id="@+id/editText1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/btn_scan"
+                android:layout_centerHorizontal="true"
+                android:ems="10"
+                android:fadeScrollbars="true"
+                android:focusableInTouchMode="false"
+                android:inputType="none|textMultiLine" />
 
-        <EditText
-        android:id="@+id/editText1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btn_scan"
-        android:layout_centerHorizontal="true"
-        android:ems="10"
-        android:fadeScrollbars="true"
-        android:focusableInTouchMode="false"
-        android:inputType="none|textMultiLine" />
+            <TextView
+                android:id="@+id/textViewStatusTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editText1"
+                android:layout_centerHorizontal="true"
+                android:text="Status:" />
 
-        <TextView
-        android:id="@+id/textViewStatusTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/editText1"
-        android:layout_centerHorizontal="true"
-        android:text="Status:" />
+            <TextView
+                android:id="@+id/textViewStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textViewStatusTitle"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="10dip"
+                android:text="" />
 
-        <TextView
-        android:id="@+id/textViewStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textViewStatusTitle"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dip"
-        android:text="" />
-    </RelativeLayout>
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="14dp" />
+        </RelativeLayout>
 
 
     </ScrollView>

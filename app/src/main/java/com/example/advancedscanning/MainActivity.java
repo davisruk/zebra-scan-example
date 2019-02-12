@@ -1,7 +1,10 @@
 package com.example.advancedscanning;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -86,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     private Gson gson;
     private FMDRequest fmdRequest;
     private FMDResponse fmdRes;
+    private String fmdHost;
 
     private Store store = Store.builder()
                                     .id("123")
@@ -97,6 +101,13 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // get fmd host from preferences
+        PreferenceManager.setDefaultValues(this,
+                R.xml.preferences, false);
+        SharedPreferences sharedPref =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        fmdHost = sharedPref.getString(SettingsActivity.KEY_PREF_FMD_SERVER, "");
 
         gson = new GsonBuilder().create();
         // Reference to UI elements
@@ -144,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
             statusTextView.setText("EMDKManager Request Failed");
         }
-
         initialiseFMDRequest();
     }
 
@@ -167,8 +177,9 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -417,8 +428,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     }
 
     private void sendFMDRequest () {
-        String url = "http://10.7.37.70:8080/camel/fmd";
-        //String url = "http://192.168.1.205:8080/camel/fmd";
+        String url = "http://" + fmdHost + ":8080/camel/fmd";
         String operation = operations.get(radioGroupAction.getCheckedRadioButtonId());
         fmdRequest.setOperation(operation);
 

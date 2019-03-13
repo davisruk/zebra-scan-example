@@ -3,6 +3,11 @@ package com.example.advancedscanning;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
@@ -10,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,6 +34,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.advancedscanning.fmdslider.model.FMDSliderPageModel;
 import com.example.advancedscanning.http.AsyncUpdateListener;
 import com.example.advancedscanning.http.request.FMDBarCode;
 import com.example.advancedscanning.http.request.FMDRequest;
@@ -37,6 +44,7 @@ import com.example.advancedscanning.http.request.Store;
 import com.example.advancedscanning.http.response.FMDPackInfo;
 import com.example.advancedscanning.http.response.FMDResponse;
 import com.example.advancedscanning.http.response.PackResponse;
+import com.example.advancedscanning.utils.fragments.SmartFragmentStatePagerAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -84,13 +92,15 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     private Button btnClearBag;
     private Button btnFmdRequest;
     private TextView textViewBagLabel;
-    private TextView textViewPacks;
+    //private TextView textViewPacks;
+    private ViewPager fmdPager;
+    private SmartFragmentStatePagerAdapter fmdPagerAdapter;
 
     private Gson gson;
     private FMDRequest fmdRequest;
     private FMDResponse fmdRes;
     private String fmdHost;
-
+    private FMDSliderPageModel fmdPageData;
     private Store store = Store.builder()
                                     .id("123")
                                     .name("Beeston")
@@ -113,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         // Reference to UI elements
         statusTextView = findViewById(R.id.textViewStatus);
         textViewBagLabel = findViewById(R.id.textViewBagLabel);
-        textViewPacks = findViewById(R.id.textViewPacks);
+        //textViewPacks = findViewById(R.id.textViewPacks);
         dataView = findViewById(R.id.editText1);
 
         RadioButton radioUndispense = findViewById(R.id.radioUndispense);
@@ -142,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
                 fmdRequest.clearBag();
                 textViewBagLabel.setText("");
                 dataView.getText().clear();
-                textViewPacks.setText("");
+                //textViewPacks.setText("");
                 initialiseFMDRequest();
                 fmdRes = null;
             }
@@ -156,6 +166,11 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
             statusTextView.setText("EMDKManager Request Failed");
         }
         initialiseFMDRequest();
+
+        fmdPager = (ViewPager)findViewById(R.id.viewPager);
+        fmdPagerAdapter = new FMDSlidePagerAdapter(getSupportFragmentManager());
+        fmdPager.setAdapter(fmdPagerAdapter);
+
     }
 
     private void initialiseFMDRequest() {
@@ -319,32 +334,34 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
     }
 
     private void renderPacks() {
-        textViewPacks.setText("");
+        //textViewPacks.setText("");
         if (fmdRes != null) {
             ArrayList<PackResponse> packResponses = fmdRes.getPackResponses();
             IntStream.range(0, packResponses.size()).forEach(idx -> {
                 PackResponse pr = packResponses.get(idx);
                 FMDPackInfo p = pr.getPack();
-                textViewPacks.append("Pack: " + idx + "\n");
-                textViewPacks.append("\tGTIN: " + p.getGtin() + "\n");
-                textViewPacks.append("\tSerial Number: " + p.getSerialNumber() + "\n");
-                textViewPacks.append("\tBatch: " + p.getBatch() + "\n");
-                textViewPacks.append("\tExpiry: " + p.getExpiry() + "\n");
-                textViewPacks.append("\tState: " + p.getPackState() + "\n");
-                textViewPacks.append("\tReasons:\n");
+                //textViewPacks.append("Pack: " + idx + "\n");
+                //textViewPacks.append("\tGTIN: " + p.getGtin() + "\n");
+                //textViewPacks.append("\tSerial Number: " + p.getSerialNumber() + "\n");
+                //textViewPacks.append("\tBatch: " + p.getBatch() + "\n");
+                //textViewPacks.append("\tExpiry: " + p.getExpiry() + "\n");
+                //textViewPacks.append("\tState: " + p.getPackState() + "\n");
+                //textViewPacks.append("\tReasons:\n");
+                /*
                 pr.getReasons().forEach(s -> {
                     textViewPacks.append("\t\t" + s + "\n");
                 });
+                */
             });
         } else if (fmdRequest != null) {
             ArrayList<FMDBarCode> packs = fmdRequest.getBag().getPacks();
             IntStream.range(0, packs.size()).forEach(idx -> {
                 FMDBarCode p = packs.get(idx);
-                textViewPacks.append("Pack: " + idx + "\n");
-                textViewPacks.append("\tGTIN: " + p.getGtin() + "\n");
-                textViewPacks.append("\tSerial Number: " + p.getSerialNumber() + "\n");
-                textViewPacks.append("\tBatch: " + p.getBatch() + "\n");
-                textViewPacks.append("\tExpiry: " + p.getExpiry() + "\n");
+                //textViewPacks.append("Pack: " + idx + "\n");
+                //textViewPacks.append("\tGTIN: " + p.getGtin() + "\n");
+                //textViewPacks.append("\tSerial Number: " + p.getSerialNumber() + "\n");
+                //textViewPacks.append("\tBatch: " + p.getBatch() + "\n");
+                //textViewPacks.append("\tExpiry: " + p.getExpiry() + "\n");
             });
         }
 
@@ -457,5 +474,32 @@ public class MainActivity extends AppCompatActivity implements AsyncUpdateListen
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    private class FMDSlidePagerAdapter extends SmartFragmentStatePagerAdapter {
+
+        public FMDSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position)
+        {
+            return fmdPagerAdapter.getRegisteredFragment(position);
+        }
+
+        @Override
+        public int getCount() {
+            return 5;
+        }
+
+        // Register the fragment when the item is instantiated
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+            registeredFragments.put(position, fragment);
+            return fragment;
+        }
+
     }
 }

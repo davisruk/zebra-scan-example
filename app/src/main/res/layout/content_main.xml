@@ -7,11 +7,50 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent">
+
+    <TextView
+        android:id="@+id/textViewBagLabelLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bag Label:" />
+
+    <TextView
+        android:id="@+id/textViewBagLabel"
+        android:layout_width="175dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="8dp"
+        android:layout_toRightOf="@+id/textViewBagLabelLabel"
+        android:text=""
+        app:layout_constraintStart_toEndOf="@+id/textViewBagLabelLabel" />
+
+    <TextView
+        android:id="@+id/textViewPacksLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewBagLabelLabel"
+        android:layout_marginTop="28dp"
+        android:text="Packs in bag:"
+        app:layout_constraintTop_toTopOf="@+id/textViewBagLabelLabel"
+        tools:layout_editor_absoluteX="0dp" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="174dp"
+            android:layout_below="@+id/textViewPacksLabel"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="1dp"
+            app:layout_constraintTop_toBottomOf="@+id/textViewPacksLabel"
+            tools:layout_editor_absoluteX="2dp" />
 
     <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingBottom="5dip"
+        android:layout_below="@id/viewPager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="147dp">
@@ -20,39 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
-            <TextView
-                android:id="@+id/textViewBagLabelLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bag Label:" />
-
-            <TextView
-                android:id="@+id/textViewBagLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/textViewBagLabelLabel"
-                android:layout_marginBottom="10dip"
-                android:text="" />
-
-            <TextView
-                android:id="@+id/textViewPacksLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textViewBagLabelLabel"
-                android:text="Packs in bag:"
-                android:layout_marginBottom="10dip"/>
-
-            <TextView
-                android:id="@+id/textViewPacks"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/textViewPacksLabel"
-                android:layout_marginBottom="10dip"
-                android:text="" />
-
             <RadioGroup
-                android:layout_below="@+id/textViewPacks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/actionGroup"
@@ -132,9 +139,9 @@
                 android:layout_marginBottom="10dip"
                 android:text="" />
 
-
         </RelativeLayout>
 
 
     </ScrollView>
+    </RelativeLayout>
 </android.support.constraint.ConstraintLayout>
